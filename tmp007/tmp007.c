@@ -6,7 +6,7 @@
 #include "./tmp007.h"
 
 /*
- *  
+ *  2 byte data union
  */
 union data16
 {
@@ -58,6 +58,9 @@ int tmp007_setup()
     else
         printf("TMP007 Communication Initialized\n");
 
+    /*
+     *  send the configuration to the configure register
+     */
     if (configure_reg(fd) < 0)
     {
         printf("Error: Configuring TMP007\n");
@@ -70,11 +73,8 @@ int tmp007_setup()
 }
 
 
-/*
- *  configure_settings()
- *
- *  RETURNS: SUCCESS if good, ERROR on error
- */
+/*  configure_reg()
+ *  RETURNS: number of bytes written */
 static inline int configure_reg(int fd)
 {
     uint8_t config[2];
@@ -84,11 +84,8 @@ static inline int configure_reg(int fd)
 }
 
 
-/*
- *  
- *
- *  RETURNS:
- */
+/*  read_data()
+ *  RETURNS: 2 bytes of read data, ERROR otherwise */
 static uint16_t read_data(int fd, uint8_t reg)
 {
     if (write(fd, &reg, 1) != 1)
@@ -104,11 +101,9 @@ static uint16_t read_data(int fd, uint8_t reg)
     return data;
 }
 
-/*
- *  
- *
- *  RETURNS:
- */
+/*  __write_data__()
+ *  This is the main function for the write_data() macro
+ *  RETURNS: number of bytes written, ERROR otherwise */
 static ssize_t __write_data__(int fd, uint8_t reg, uint8_t *data, size_t size)
 {
     if (size > 2)
@@ -126,11 +121,8 @@ static ssize_t __write_data__(int fd, uint8_t reg, uint8_t *data, size_t size)
     return write(fd, w, len);
 }
 
-/*
- *  
- *
- *  RETURNS:
- */
+/*  convert_temp_f()
+ *  RETURNS: converted temperature data in fahrenheit */
 static float convert_temp_f(union data16 data)
 {
     /*
