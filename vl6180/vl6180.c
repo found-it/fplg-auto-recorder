@@ -179,13 +179,13 @@ static uint8_t read_data8(int fd, uint16_t regi)
 
     if ((len = write(fd, reg_addr, sizeof(reg_addr))) < 0)
     {
-        printf("Register not written, value returned: %d\n", len);
+        printf("Register not written, value returned: %ld\n", len);
         return ERROR;
     }
 
     if ((len = read(fd, &data, sizeof(data))) < 0)
     {
-        printf("Register not read, value returned: %d\n", len);
+        printf("Register not read, value returned: %ld\n", len);
         return ERROR;
     }
 
