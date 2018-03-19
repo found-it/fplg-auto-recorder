@@ -86,25 +86,32 @@ def init_vl6180():
     return vl.vl6180_setup()
 
 # Main loop.........
-count= 2
-time_col = 1
-distance_ = 2
-current_sheet = 3
+row       = 1
+time_col  = 1
+dist_col  = 2
+curnt_col = 3
 
 try:
+
     vl6180_fd = init_vl6180()
-    sheet.update_cell(1,1, "Time (h:m:s)")
-    sheet.update_cell(1,2, "Distance (mm)")
-    sheet.update_cell(1,3, "Current (A)")
+    sheet.update_cell(row, time_col,  "Time (h:m:s)")
+    sheet.update_cell(row, dist_col,  "Distance (mm)")
+    sheet.update_cell(row, curnt_col, "Current (A)")
 
     while True:
         sleep(0.5)
-        dis=str(vl.vl6180_read_range(vl6180_fd)) 
-        print dis
-        sheet.update_cell(count, 1,str(datetime.datetime.now().time()))
-        sheet.update_cell(count,2, dis)
+
+        # Increment the row 
+        row += 1
+
+        # Get the distance measurement
+        dist = str(vl.vl6180_read_range(vl6180_fd)) 
+        print dist
+
+        # Update the sheet
+        sheet.update_cell(row, time_col, str(datetime.datetime.now().time()))
+        sheet.update_cell(row, dist_col, dist)
         
-        count+=1
         
         # acs_current = get_current()
     
