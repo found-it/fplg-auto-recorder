@@ -133,8 +133,8 @@ static float convert_temp_f(union data16 data)
     int tmp     = (hb + lb) >> 2;
 
     float celsius = tmp * 0.03125;
-    printf("[C] cels: %0.2f\n", celsius);
-    return celsius * 1.8 + 32;
+    //printf("[C] cels: %0.2f\n", celsius);
+    return celsius; //* 1.8 + 32;
 }
 
 
@@ -153,6 +153,6 @@ float tmp007_read_temp(int fd)
         return ERROR;
     }
     float temp =  convert_temp_f(data);
-    printf("[C] Temp: %0.2f\n", temp);
+    //printf("[C] Temp: %0.2f\n", temp);
     return temp;
 }
