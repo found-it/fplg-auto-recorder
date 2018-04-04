@@ -224,13 +224,33 @@ int vl6180_read_range(int fd)
 {
 
     uint8_t stat;
+    int range;
     stat = read_data8(fd, 0x04d);
 
     stat = write_data8(fd, 0x018, 0x01);
 
     while (((stat = read_data8(fd, 0x04f)) & 0x07) != 0x04);
-    int range = read_data8(fd, 0x063);
+    range = read_data8(fd, 0x063);
 
+    stat = write_data8(fd, 0x015, 0x07);
+    return range;
+}
+
+
+/*
+ *  vl6180_poll_range()
+ *
+ *  RETURNS:
+ *  TODO: add error checks
+ */
+int vl6180_poll_range(int fd)
+{
+
+    uint8_t stat;
+    int range;
+    stat = read_data8(fd, 0x04d);
+    stat = write_data8(fd, 0x018, 0x01);
+    range = read_data8(fd, 0x063);
     stat = write_data8(fd, 0x015, 0x07);
     return range;
 }

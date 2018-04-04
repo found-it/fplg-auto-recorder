@@ -27,7 +27,6 @@ static float convert_temp_f(union data16 data);
 
 /*
  *  setup()
- *
  *  RETURNS: file descriptor if setup is good, ERROR on error
  */
 int tmp007_setup()
@@ -73,8 +72,10 @@ int tmp007_setup()
 }
 
 
-/*  configure_reg()
- *  RETURNS: number of bytes written */
+/*
+ *  configure_reg()
+ *  RETURNS: number of bytes written
+ */
 static inline int configure_reg(int fd)
 {
     uint8_t config[2];
@@ -84,8 +85,10 @@ static inline int configure_reg(int fd)
 }
 
 
-/*  read_data()
- *  RETURNS: 2 bytes of read data, ERROR otherwise */
+/*  
+ *  read_data()
+ *  RETURNS: 2 bytes of read data, ERROR otherwise 
+ */
 static uint16_t read_data(int fd, uint8_t reg)
 {
     if (write(fd, &reg, 1) != 1)
@@ -101,9 +104,11 @@ static uint16_t read_data(int fd, uint8_t reg)
     return data;
 }
 
-/*  __write_data__()
+/*  
+ *  __write_data__()
  *  This is the main function for the write_data() macro
- *  RETURNS: number of bytes written, ERROR otherwise */
+ *  RETURNS: number of bytes written, ERROR otherwise 
+ */
 static ssize_t __write_data__(int fd, uint8_t reg, uint8_t *data, size_t size)
 {
     if (size > 2)
@@ -121,8 +126,10 @@ static ssize_t __write_data__(int fd, uint8_t reg, uint8_t *data, size_t size)
     return write(fd, w, len);
 }
 
-/*  convert_temp_f()
- *  RETURNS: converted temperature data in fahrenheit */
+/*  
+ *  convert_temp_f()
+ *  RETURNS: converted temperature data in fahrenheit 
+ */
 static float convert_temp_f(union data16 data)
 {
     /*

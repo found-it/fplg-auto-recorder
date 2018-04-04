@@ -8,6 +8,8 @@
 #   school year.
 #
 
+#!/usr/bin/python
+
 # Imports..................
 from   ctypes import *
 from   sys    import argv
@@ -18,22 +20,23 @@ import spidev
 import time
 import csv
 
-# Variables
-acs_offset = 2.438
-acs_step   = 0.185
-row        = 1
-time_col   = 1
-dist_col   = 2
-curnt_col  = 3
-temp_col   = 4
+# pseudo defines
+ERROR = -1
 
+# Variables
+ADC_vcc         = 5.0
+voltage_channel = 0
+current_channel = 1
+force_on        = False
+
+# script argument stuff
 print argv
 if len(argv) > 1:
     print len(argv)
     print argv[1]
 
 # Open up SPI
-spi=spidev.SpiDev()
+spi = spidev.SpiDev()
 spi.open(0,0)
 
 # Get the VL6180 C functions
@@ -43,43 +46,45 @@ vl = CDLL('./vl6180/vl6180.so')
 tm = CDLL('./tmp007/tmp007.so')
 
 
-# This function returns the 10-bit integer
-# received from the ADC.
-def get_adc(channel):
-    if ((channel > 1) or (channel < 0)):
-        return -1
-    r = spi.xfer2([1, (2 + channel) << 6, 0])
-    ret = ((r[1] & 31) << 6) + (r[2] >> 2)
-    return ret
-
-
 # This function returns the converted
-# adc voltage
+# ADC voltage from the 10-bit ADC
 def adc_to_volt(reading):
-    return float((reading * 5.0) / 1024)
+    return float((reading * ADC_vcc) / 1024)
 
 
 # This function gets the measured voltage
 # from the ADC and returns the converted voltage
-def get_voltage():
+def get_voltage(channel):
     reading = 0
     for i in xrange(63):
-        reading = reading + get_adc(1)
+        reading = reading + get_adc(channel)
     reading = reading>>6
-    return (adc_to_volt(reading) * 5.0)
+    return (adc_to_volt(reading) * ADC_vcc)
 
 
 # This function returns the oversampled
 # current value from the ACS712
-def get_current():
+def get_current(channel):
+    acs_offset = 2.438
+    acs_step   = 0.185
     reading = 0
     for i in xrange(63):
-        reading = reading + get_adc(0)
+        reading = reading + get_adc(channel)
     reading  = reading>>6
     adc_volt = adc_to_volt(reading)
     adj_volt = adc_volt - acs_offset
     current  = adj_volt / acs_step
     return current
+
+
+# This function returns the 10-bit integer
+# received from the ADC.
+def get_adc(channel):
+    if ((channel > 7) or (channel < 0)):
+        return ERROR
+    adc = spi.xfer2([1,(8+channel)<<4,0])
+    data = ((adc[1]&3)<<8)+adc[2]
+    return data
 
 
 # This function initializes the VL6180 sensor.
@@ -97,10 +102,10 @@ def init_vl6180():
     g.output(gpin, 1)
     return vl.vl6180_setup()
 
-force_on = False
+
 # Main loop.........
 try:
-# This function reads from rs232 
+    # This function reads from rs232 
     if (force_on):
         ser = serial.Serial(
             port     = '/dev/ttyUSB0',
@@ -131,30 +136,29 @@ try:
         while True:
 
             # Get the measurements
+            acs_current = get_current(current_channel)
+            volt        = get_voltage(voltage_channel)
+            dist        = vl.vl6180_read_range(vl6180_fd)
+            temp        = float(tmp007_read(tmp007_fd))
+            time        = str(datetime.datetime.now().time())
             if (force_on):
                 force       = ser.readline()
                 mylist = force.split()
                 print mylist[0]
                 print mylist[1]
                 print mylist[2]
-            acs_current = get_current()
-            volt        = get_voltage()
-            dist        = vl.vl6180_read_range(vl6180_fd)
-            temp        = float(tmp007_read(tmp007_fd))
-            time        = str(datetime.datetime.now().time())
-
-            # Write to csv
-            if (force_on):
                 csv_w.writerow([time, acs_current, volt, dist, temp, force])
+                print "force:       " + str(force) + " N"
+            # Write to csv
             else:
                 csv_w.writerow([time, acs_current, volt, dist, temp, "force"])
 
 
+            print "time:        " + time
             print "distance:    " + str(dist)  + " mm"
             print "temperature: " + str(temp)  + " C"
             print "voltage:     " + str(volt)  + " V"
-            if (force_on):
-                print "force:       " + str(force) + " N"
+            print "current:     " + str(acs_current)  + " V"
             print "-------------------"
 
 # Close up the spi..
