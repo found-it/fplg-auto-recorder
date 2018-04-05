@@ -9,7 +9,8 @@ ERROR = -1
 
 # Variables
 ADC_vcc         = 5.0
-voltage_channel = 0
+voltage_channel1 = 2
+voltage_channel2 = 7
 
 # Open up SPI
 spi = spidev.SpiDev()
@@ -29,24 +30,42 @@ def get_adc(channel):
     data = ((adc[1]&3)<<8)+adc[2]
     return data
 
+# This function gets the measured voltage
+# from the ADC and returns the converted voltage
+def get_voltage(channel):
+    reading = 0
+    for i in xrange(63):
+        reading = reading + get_adc(channel)
+    reading = reading>>6
+    return (adc_to_volt(reading) * ADC_vcc)
 
+
+write_csv = False
 
 try:
-    # Get the time and create file name
-    filename = "voltage_sampling_rate.csv"
+    if write_csv:
+        # Get the time and create file name
+        filename = "voltage_sampling_rate.csv"
 
-    with open(filename, 'wb') as outfile:
-        csv_w = csv.writer(outfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-        csv_w.writerow(['Time (h:m:s)', 'Voltage [V]'])
+        with open(filename, 'wb') as outfile:
+            csv_w = csv.writer(outfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            csv_w.writerow(['Time (h:m:s)', 'Voltage [V]'])
 
+            while True:
+
+                # Get the measurements
+                volt = adc_to_volt(get_adc(voltage_channel))
+                time = str(datetime.datetime.now().time())
+                # Write to csv
+                csv_w.writerow([time, volt])
+    else:
         while True:
-
-            # Get the measurements
-            volt = adc_to_volt(get_adc(voltage_channel))
-            time        = str(datetime.datetime.now().time())
-            # Write to csv
-            csv_w.writerow([time, volt])
-
+            volt1 = get_voltage(voltage_channel1)
+            volt2 = get_voltage(voltage_channel2)
+            print "Voltage1: " + str(volt1) + " [V]"
+            print "Voltage2: " + str(volt2) + " [V]"
+            print "---------------------------------"
+            time.sleep(0.5)
 # Close up the spi..
 finally:
     spi.close()

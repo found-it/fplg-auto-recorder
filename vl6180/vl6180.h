@@ -36,6 +36,9 @@ typedef struct i2c_dev
 
 int vl6180_setup();
 int vl6180_read_range(int fd);
-int vl6180_poll_range(int fd);
+
+int vl6180_setup_poll(int fd);
+int vl6180_poll(int fd);
+int vl6180_read(int fd);
 
 #endif

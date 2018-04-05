@@ -243,14 +243,21 @@ int vl6180_read_range(int fd)
  *  RETURNS:
  *  TODO: add error checks
  */
-int vl6180_poll_range(int fd)
+int vl6180_setup_poll(int fd)
 {
 
     uint8_t stat;
     int range;
     stat = read_data8(fd, 0x04d);
-    stat = write_data8(fd, 0x018, 0x01);
-    range = read_data8(fd, 0x063);
-    stat = write_data8(fd, 0x015, 0x07);
-    return range;
+    return write_data8(fd, 0x018, 0x01);
+}
+
+int vl6180_read(int fd)
+{
+    return read_data8(fd, 0x063);
+}
+
+int vl6180_poll(int fd)
+{
+    return read_data8(fd, 0x04f) & 0x07;
 }

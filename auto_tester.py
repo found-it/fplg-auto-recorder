@@ -82,8 +82,8 @@ def get_current(channel):
 def get_adc(channel):
     if ((channel > 7) or (channel < 0)):
         return ERROR
-    adc = spi.xfer2([1,(8+channel)<<4,0])
-    data = ((adc[1]&3)<<8)+adc[2]
+    raw  = spi.xfer2([1, (8 + channel) << 4, 0])
+    data = ((raw[1] & 3) << 8) + raw[2]
     return data
 
 
