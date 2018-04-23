@@ -31,7 +31,7 @@ int vl6180_setup()
 {
     int stat = 0;
     int fd;
-    int addr = VL6180_ID;
+    int addr   = VL6180_ID;
     char* dev  = VL6180_DEV;
 
     /*
@@ -225,14 +225,20 @@ int vl6180_read_range(int fd)
 
     uint8_t stat;
     int range;
-    stat = read_data8(fd, 0x04d);
+    if (read_data8(fd, 0x04d) == ERROR)
+        LOG_ERROR_S("Reading register 0x04d.\n");
 
-    stat = write_data8(fd, 0x018, 0x01);
+    if (write_data8(fd, 0x018, 0x01) == ERROR)
+        LOG_ERROR_S("Writing register 0x018.\n");
 
     while (((stat = read_data8(fd, 0x04f)) & 0x07) != 0x04);
-    range = read_data8(fd, 0x063);
 
-    stat = write_data8(fd, 0x015, 0x07);
+    if (range = read_data8(fd, 0x063) == ERROR)
+        LOG_ERROR_S("Reading range.\n");
+
+    if (write_data8(fd, 0x015, 0x07) == ERROR)
+        LOG_ERROR_S("Clearing interrupts.\n");
+
     return range;
 }
 

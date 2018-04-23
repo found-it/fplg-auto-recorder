@@ -17,7 +17,8 @@ ERROR = -1
 
 # Variables
 ADC_vcc         = 5.0
-current_channel = 1
+current_channel = 0
+csv_on = True
 
 # Open up SPI
 spi = spidev.SpiDev()
@@ -57,17 +58,23 @@ try:
     # Get the time and create file name
     filename = "current_sampling_rate.csv"
 
-    with open(filename, 'wb') as outfile:
-        csv_w = csv.writer(outfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-        csv_w.writerow(['Time (h:m:s)', 'Current [A]'])
+    start_time = datetime.datetime.now()
+    if csv_on:
+        with open(filename, 'wb') as outfile:
+            csv_w = csv.writer(outfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            csv_w.writerow(['Time (h:m:s)', 'Current [A]'])
 
+            while True:
+
+                # Get the measurements
+                acs_current = get_current()
+                time      = ((datetime.datetime.now()) - start_time).total_seconds()
+                # Write to csv
+                csv_w.writerow([time, acs_current])
+    else:
         while True:
-
-            # Get the measurements
             acs_current = get_current()
-            time        = str(datetime.datetime.now().time())
-            # Write to csv
-            csv_w.writerow([time, acs_current])
+            print acs_current
 
 
 # Close up the spi..

@@ -142,7 +142,7 @@ try:
             temp        = float(tmp007_read(tmp007_fd))
             time        = str(datetime.datetime.now().time())
             if (force_on):
-                force       = ser.readline()
+                force  = ser.readline()
                 mylist = force.split()
                 print mylist[0]
                 print mylist[1]
